@@ -1,5 +1,4 @@
-# Gaussian elimination algorithm
-
+# Python script for gaussian matrix (very rough version)
 '''
 The desired end matrix comes in the following form:
 [. . . | .]
@@ -21,9 +20,6 @@ feasible in the first place
 '''
 
 main_matrix = []
-coefficient_A = 0
-coefficient_B = 0
-coefficient_C = 0
 
 def extract_coefficients(input_equation: str):
     # normally the equation will look something like: 2x+3y+6z=5
@@ -37,16 +33,50 @@ def extract_coefficients(input_equation: str):
     x = int(coefficients[0].split('x')[0])
     y = int(coefficients[1].split('y')[0])
     z = int(coefficients[2].split('z')[0])
-    return (x, y, z, result)
+    return [x, y, z, result]
 
 for i in range (0, 3):
     input_equation = input(f"Enter equation {i+1} here: ")
     row = extract_coefficients(input_equation)
-    print(row)
     main_matrix.append(row)
 
-def first_transformation():
+print(main_matrix)
+
+def scalar_multiplication(matrix: list, coefficient: int, main_row_index: int, secondary_row_index: int):
+    for i in range(0, 4):
+        matrix[main_row_index][i] = (coefficient*matrix[main_row_index][i])+matrix[secondary_row_index][i]
+    return matrix
+
+def first_transformation(main_matrix):
     # find first A coefficient from the R2C1 and R1C1
     A = -(main_matrix[0][0])/(main_matrix[1][0])
-    return A
-print(first_transformation())
+    main_matrix = scalar_multiplication(main_matrix, A, 1, 0)
+    return main_matrix
+
+def second_transformation(matrix):
+    # find B coefficient from the R3C1 and R1C1
+    B = -(matrix[0][0])/(matrix[2][0])
+    matrix = scalar_multiplication(matrix, B, 2, 0)
+    return matrix
+
+def third_transformation(matrix):
+    # find C coefficient from the R3C2 and R2C2
+    C = -(matrix[1][1])/(matrix[2][1])
+    matrix = scalar_multiplication(matrix, C, 2, 1)
+    return matrix
+
+eliminated_matrix = third_transformation(
+                        second_transformation(
+                            first_transformation(main_matrix)
+                        )
+                    )
+
+z = eliminated_matrix[2][3]/eliminated_matrix[2][2]
+y = (eliminated_matrix[1][3]-(eliminated_matrix[1][2]*z))/eliminated_matrix[1][1]
+x = (eliminated_matrix[0][3]-(eliminated_matrix[0][1]*y)-(eliminated_matrix[0][2]*z)) / eliminated_matrix[0][0]
+
+print((x,y,z))
+
+# solving for z = matrix[2][3] / matrix[2][2]
+# solving for y = ([1][3]-([1][2]*z))/[1][1]
+# solving for x = ([0][3]-([0][2]*z)-([0][1]*y)) / [0][0]
